@@ -1,5 +1,5 @@
 #!/usr/bin/dumb-init /bin/sh
-# Copyright IBM Corp. 2020, 2026
+# Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: BUSL-1.1
 
 set -e
@@ -30,38 +30,25 @@ fi
 
 # If we are running Boundary, make sure it executes as the proper user.
 if [ "$1" = 'boundary' ]; then
-	is_root=0
-	if [ "$(id -u)" = '0' ]; then
-		is_root=1
-	fi
-
     if [ -z "$SKIP_CHOWN" ]; then
-        if [ "$is_root" = '1' ]; then
-            # If the config dir is bind mounted then chown it
-            if [ "$(stat -c %u /boundary)" != "$(id -u boundary)" ]; then
-                chown -R boundary:boundary /boundary || echo "Could not chown /boundary (may not have appropriate permissions)"
-            fi
-        else
-            >&2 echo "SKIP_CHOWN not set but running non-root; skipping chown /boundary"
+        # If the config dir is bind mounted then chown it
+        if [ "$(stat -c %u /boundary)" != "$(id -u boundary)" ]; then
+            chown -R boundary:boundary /boundary || echo "Could not chown /boundary (may not have appropriate permissions)"
         fi
     fi
 
     if [ -z "$SKIP_SETCAP" ]; then
-        if [ "$is_root" = '1' ]; then
-            # Allow mlock to avoid swapping Boundary memory to disk
-            setcap cap_ipc_lock=+ep $(readlink -f $(which boundary))
+        # Allow mlock to avoid swapping Boundary memory to disk
+        setcap cap_ipc_lock=+ep $(readlink -f $(which boundary))
 
-            # In the case Boundary has been started in a container without IPC_LOCK privileges
-            if ! boundary -version 1>/dev/null 2>/dev/null; then
-                >&2 echo "Couldn't start Boundary with IPC_LOCK. Disabling IPC_LOCK, please use --privileged or --cap-add IPC_LOCK"
-                setcap cap_ipc_lock=-ep $(readlink -f $(which boundary))
-            fi
-        else
-            >&2 echo "SKIP_SETCAP not set but running non-root; skipping setcap"
+        # In the case Boundary has been started in a container without IPC_LOCK privileges
+        if ! boundary -version 1>/dev/null 2>/dev/null; then
+            >&2 echo "Couldn't start Boundary with IPC_LOCK. Disabling IPC_LOCK, please use --privileged or --cap-add IPC_LOCK"
+            setcap cap_ipc_lock=-ep $(readlink -f $(which boundary))
         fi
     fi
 
-    if [ "$is_root" = '1' ]; then
+    if [ "$(id -u)" = '0' ]; then
       set -- su-exec boundary "$@"
     fi
 fi
