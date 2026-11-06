@@ -22,7 +22,6 @@ RUN set -eux && \
     apk add --no-cache wget ca-certificates dumb-init gnupg libcap openssl su-exec iputils libc6-compat iptables
 
 ADD bin/boundary /bin/boundary
-RUN setcap cap_ipc_lock=+ep /bin/boundary
 
 RUN mkdir /boundary/
 ADD .release/docker/config.hcl /boundary/config.hcl
