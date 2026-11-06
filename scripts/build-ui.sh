@@ -25,11 +25,11 @@ else
 fi
 
 if [ $UI_SRC == "oss" ]; then
-  UI_REPO=https://github.com/hashicorp/boundary-ui
+  UI_REPO=https://github.com/age9990/boundary-ui
   REPO_NAME=boundary-ui
 else
   UI_VERSION_FILE="${UI_VERSION_FILE}_ent"
-  UI_REPO=https://github.com/hashicorp/boundary-ui-enterprise
+  UI_REPO=https://github.com/age9990/boundary-ui-enterprise
   REPO_NAME=boundary-ui-enterprise
 fi
 
@@ -45,15 +45,15 @@ fi;
 if which gh &> /dev/null;  then
     echo "Found gh cli, attempting to download ui assets"
 
-    artifact_id=$(gh api "repos/hashicorp/${REPO_NAME}/actions/artifacts" --paginate | \
-        jq ".artifacts[] | select(.workflow_run.head_sha == \"${UI_COMMITISH}f\" and .name == \"admin-ui-${UI_SRC}\")" | \
+    artifact_id=$(gh api "repos/age9990/${REPO_NAME}/actions/artifacts" --paginate | \
+        jq ".artifacts[] | select(.workflow_run.head_sha == \"${UI_COMMITISH}\" and .name == \"admin-ui-${UI_SRC}\")" | \
         jq --slurp '.[0]' | \
         jq -r '.id')
 
     if [[ "${artifact_id}" != "null" ]]; then
         echo "Downloading artifact: ${artifact_id} for admin-ui-${UI_SRC} ${UI_COMMITISH}"
         tmp_dir=$(mktemp -d)
-        gh api "repos/hashicorp/${REPO_NAME}/actions/artifacts/${artifact_id}/zip" > "${tmp_dir}/boundary-ui.zip"
+        gh api "repos/age9990/${REPO_NAME}/actions/artifacts/${artifact_id}/zip" > "${tmp_dir}/boundary-ui.zip"
         trap 'rm -rf ${tmp_dir}' EXIT
 
         # remove any previous artifact download or git clone
