@@ -8,9 +8,9 @@ on:
     branches: [main]
   repository_dispatch:
     types: [ui-updated]
-  schedule:
+  # schedule:
     # 每週一 00:00 UTC 自動重建
-    - cron: "0 0 * * 1"
+    # - cron: "0 0 * * 1"
   workflow_dispatch:
 
 env:
